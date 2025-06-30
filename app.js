@@ -1,6 +1,13 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 
+// Base de datos
+mongoose.connect("mongodb://localhost:27017/aroundb")
+
+
+
+// Rutas
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
