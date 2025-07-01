@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const { Types } = mongoose;
 
-const cards = new mongoose.Schema({
+const cardSchema = new mongoose.Schema({
   name: {
     type:String,
     minlength: 2,
@@ -18,11 +19,11 @@ const cards = new mongoose.Schema({
     required: [true, 'Se requiere una URL válida']
   },
   owner: {
-    type: ObjectId,
+    type: Types.ObjectId,
     require: true
   },
   likes: {
-    type: ObjectId,
+    type: Types.ObjectId,
     default: []
   },
   createdAt: {
