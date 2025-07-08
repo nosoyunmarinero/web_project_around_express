@@ -23,19 +23,20 @@ const {name, link} = req.body;
 //Delete (DELETE)
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.id)
+    .orFail(new Error('NOT_FOUND'))
     .then(card => {
-        if (!card){
-          return res.status(NOT_FOUND).send({message: "Card no encontrada"});
-        }
      res.send({ data: card, message: 'Card eliminada con exito' });
       })
     .catch(err => {
-      console.log(err.name);
-
-      return err.name === 'CastError'
-      ? res.status(BAD_REQUEST).send({message: 'Datos no validos al eliminar card'})
-      : res.status(SERVER_ERROR).send({ message: 'Error al eliminar la card' })});
-}
+      if (err.message === 'NOT_FOUND') {
+        return res.status(NOT_FOUND).send({ message: "Card no encontrada" });
+      }
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: 'ID inválido' });
+      }
+      res.status(SERVER_ERROR).send({ message: 'Error al eliminar la card' });
+    });
+};
 
 //GET
 module.exports.getCards = (req, res) => {
@@ -46,3 +47,22 @@ module.exports.getCards = (req, res) => {
       res.status(SERVER_ERROR).send({ message: 'Error al obtener las cards' });
     });
 }
+
+//Dar like (PUT)
+module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
+    req.params.cardId,
+    {$addToSet: {likes: req.user._id} },
+    {new: true},
+  )
+    .then(card => res.send({data: card}))
+    .catch(err => res.status(SERVER_ERROR).send({message: "Error al dar like"}))
+
+
+//Quitar Like (DELETE)
+module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
+  req.params.cardId,
+  { $pull: { likes: req.user._id } },
+  { new: true },
+)
+    .then(card => res.send({data: card}))
+    .catch(err => res.status(SERVER_ERROR).send({message: "Error al quitar like"}))
